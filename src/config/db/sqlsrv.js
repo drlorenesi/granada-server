@@ -1,0 +1,48 @@
+// https://www.npmjs.com/package/mssql
+const { ConnectionPool } = require('mssql');
+
+const pool = new ConnectionPool({
+  user: process.env.SQLSRV_USER,
+  password: process.env.SQLSRV_PASSWORD,
+  database: process.env.SQLSRV_DATABASE,
+  server: process.env.SQLSRV_HOST,
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+  options: {
+    encrypt: false,
+    enableArithAbort: true,
+  },
+});
+
+// Test connection during App startup
+async function sqlsrvConnect() {
+  try {
+    const db = await pool.connect();
+    console.log(`- Conectado a ${db.config.database} en ${db.config.server}`);
+  } catch (err) {
+    console.error(
+      '- No fue posible conectarse a la Base de Datos:',
+      err.message
+    );
+    return err;
+  }
+}
+
+// Write async queries as:
+// const { duration, rows, rowsAffected } = await query(`SELECT NOW()`);
+async function query(sql) {
+  try {
+    const start = Date.now();
+    await pool.connect();
+    const { recordset: rows, rowsAffected } = await pool.query(sql);
+    const duration = Date.now() - start;
+    return { duration: `${duration} ms`, rows, rowsAffected: rowsAffected[0] };
+  } catch (err) {
+    console.log('Database error:', err.message);
+  }
+}
+
+module.exports = { sqlsrvConnect, query };
