@@ -1,10 +1,12 @@
 # Granada Server
 
-Aplicación para autenticar y crear sesiones de usuarios que utiliza [Express](https://expressjs.com/) y [MongoDB](https://www.mongodb.com/).
+Back End para para autenticar y crear sesiones de usuarios que utiliza [Express](https://expressjs.com/) y [MongoDB](https://www.mongodb.com/). Una vez autenticados los usuarios, puede hacer consultas a los Endpoints disponibles y tendrán acceso según su role.
+
+Este proyecto hace uso de [HttpOnly Cookies](https://www.cookiepro.com/knowledge/httponly-cookie/) para autenticar a los usuarios. Por esta razón, es necesario correr el proceso en [HTTPS](https://www.cloudflare.com/learning/ssl/what-is-https/).
 
 ## Como Iniciar
 
-Este proyecto hace uso de [HttpOnly Cookies](https://www.cookiepro.com/knowledge/httponly-cookie/) para que el cliente no pueda acceder al recurso de autenticación. Por esta razón, es necesario correr el proceso en [HTTPS](https://www.cloudflare.com/learning/ssl/what-is-https/). La manera mas sencilla de crear un servidor seguro en un ambiente de desarrollo es usando [Caddy](https://caddyserver.com/docs/getting-started). Con Caddy podemos crear un [reverse proxy](https://caddyserver.com/docs/quick-starts/reverse-proxy) usando el `Caddyfile` incluido en el proyecto y corriendo el siguiente commando en una terminal:
+La manera mas sencilla de crear un servidor seguro en un ambiente de desarrollo es usando [Caddy](https://caddyserver.com/docs/getting-started). Con Caddy podemos crear un [reverse proxy](https://caddyserver.com/docs/quick-starts/reverse-proxy) usando el `Caddyfile` incluido en el proyecto y corriendo el siguiente commando en una terminal:
 
 ```bash
 caddy run
@@ -14,10 +16,16 @@ Adicionalmente, debemos crea un archivo tipo `.env` en el folder raíz con la si
 
 ```text
 JWT_SIGNATURE=
-ORIGIN= (de donde vendrán las solicitudes, ej. 'mysitio.com' ó 'http://localhost:3000' en desarrollo)
-ACCESTOKEN_MAX_AGE= (tiempo en minutos)
-REFRESHTOKEN_MAX_AGE= (tiempo en minutos)
+ORIGIN=(de donde vendrán las solicitudes, ej. 'mysitio.com' ó 'http://localhost:3000' en desarrollo)
+ACCESTOKEN_MAX_AGE=(tiempo en minutos)
+REFRESHTOKEN_MAX_AGE=(tiempo en minutos)
 MONGO_URL=
+
+# Base de Datos #
+SQLSRV_USER=
+SQLSRV_PASSWORD=
+SQLSRV_DATABASE=
+SQLSRV_HOST=
 
 # Opcional #
 SENTRY_URL=
