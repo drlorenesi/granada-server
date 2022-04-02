@@ -41,7 +41,7 @@
     "lodash": "^4.17.21",
     "mongoose": "^6.0.7",
     "morgan": "^1.10.0",
-    "mssql": "^7.3.0",
+    "mssql": "^8.0.2",
     "nanoid": "^3.1.22",
     "nodemailer": "^6.5.0",
     "winston": "^3.3.3"

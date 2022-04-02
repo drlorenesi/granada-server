@@ -1,13 +1,9 @@
-// - Sample 'ecosystem.config.js' file if you plan on running your
-//   app with PM2 (https://pm2.keymetrics.io/docs/usage/quick-start/)
-// - If you are using an `.env` file, make sure it is on the same
-//   level as ecosystem.config.js file
-
+// Asegurarse de que el archivo `.env` esté en el mismo directorio que este archivo
 module.exports = {
   apps: [
     {
       // General
-      name: 'Granada Backend',
+      name: 'Node Auth',
       script: './apps/granada-server/src/server.js',
       watch: './apps/granada-server',
       watch_delay: 1000,

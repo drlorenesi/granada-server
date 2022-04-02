@@ -2,7 +2,7 @@ const express = require('express');
 const Joi = require('joi');
 const auth = require('../../middleware/auth');
 const { validateQuery, validateParams } = require('../../middleware/validar');
-const { query } = require('../../config/db/sqlsrv');
+const { runQuery } = require('../../config/db/sqlsrv');
 
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.get(
   async (req, res) => {
     const { tipo, estatus } = req.query;
     console.log(tipo, estatus);
-    const { duration, rows } = await query(`
+    const { duration, rows } = await runQuery(`
   DECLARE
     @Tipo INT = '${tipo}',
     @Estatus VARCHAR(30) = '${estatus}'

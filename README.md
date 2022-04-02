@@ -15,6 +15,7 @@ caddy run
 Adicionalmente, debemos crea un archivo tipo `.env` en el folder raíz con la siguiente información:
 
 ```text
+# Generales #
 JWT_SIGNATURE=
 ORIGIN=(de donde vendrán las solicitudes, ej. 'mysitio.com' ó 'http://localhost:3000' en desarrollo)
 ACCESTOKEN_MAX_AGE=(tiempo en minutos)
@@ -25,14 +26,16 @@ MONGO_URL=
 SQLSRV_USER=
 SQLSRV_PASSWORD=
 SQLSRV_DATABASE=
-SQLSRV_HOST=
+SQLSRV_HOST=(ip)
 
-# Opcional #
-SENTRY_URL=
+# Servidor de Correos #
 MAIL_HOST=
 MAIL_PORT=
 MAIL_USER=
 MAIL_PASS=
+
+# Opcional #
+SENTRY_URL=
 ```
 
 Si la aplicación no detecta esta información, no iniciará y desplegará "`ERROR TERMINAL: ...`" en la consola.

@@ -23,10 +23,13 @@ const debug = require('../routes/utils/debug');
 // const productos = require('../routes/inventario/productos');
 // const tipos = require('../routes/inventario/tipos');
 // Reportes
-// Ventas
+// --------
+// A - Ventas
 const canal = require('../routes/reportes/ventas/canal');
 const producto = require('../routes/reportes/ventas/producto');
 const categoria = require('../routes/reportes/ventas/categoria');
+// B - Produccion
+const sugerido = require('../routes/reportes/produccion/sugerido');
 
 module.exports = (app) => {
   // Generales
@@ -54,8 +57,11 @@ module.exports = (app) => {
   // app.use('/v1/inventario/productos', productos);
   // app.use('/v1/inventario/tipos', tipos);
   // Reportes
-  // Ventas
+  // --------
+  // A - Reportes
   app.use('/v1/reportes/ventas/canal', canal);
   app.use('/v1/reportes/ventas/producto', producto);
   app.use('/v1/reportes/ventas/categoria', categoria);
+  // B - Produccion
+  app.use('/v1/reportes/produccion/sugerido', sugerido);
 };

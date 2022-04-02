@@ -2,7 +2,7 @@ const express = require('express');
 const Joi = require('joi');
 const auth = require('../../../middleware/auth');
 const { validateQuery } = require('../../../middleware/validar');
-const { query } = require('../../../config/db/sqlsrv');
+const { runQuery } = require('../../../config/db/sqlsrv');
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.get(
   [auth(rolesAutorizados), validateQuery(validateDates)],
   async (req, res) => {
     const { fechaIni, fechaFin } = req.query;
-    const { duration, rows } = await query(`
+    const { duration, rows } = await runQuery(`
     DECLARE
       @FechaIni DATE = '${fechaIni}',
       @FechaFin DATE = '${fechaFin}'

@@ -1,7 +1,7 @@
 // https://www.npmjs.com/package/mssql
-const { ConnectionPool } = require('mssql');
+const sql = require('mssql');
 
-const pool = new ConnectionPool({
+const sqlConfig = {
   user: process.env.SQLSRV_USER,
   password: process.env.SQLSRV_PASSWORD,
   database: process.env.SQLSRV_DATABASE,
@@ -12,15 +12,15 @@ const pool = new ConnectionPool({
     idleTimeoutMillis: 30000,
   },
   options: {
-    encrypt: false,
-    enableArithAbort: true,
+    encrypt: false, // for azure
+    trustServerCertificate: true, // change to true for local dev / self-signed certs
   },
-});
+};
 
 // Test connection during App startup
 async function sqlsrvConnect() {
   try {
-    const db = await pool.connect();
+    const db = await sql.connect(sqlConfig);
     console.log(`- Conectado a ${db.config.database} en ${db.config.server}`);
   } catch (err) {
     console.error(
@@ -32,17 +32,19 @@ async function sqlsrvConnect() {
 }
 
 // Write async queries as:
-// const { duration, rows, rowsAffected } = await query(`SELECT NOW()`);
-async function query(sql) {
+// const { duration, rows, rowsAffected } = await runQuery(`SELECT GETDATE() AS Time`);
+// Return result as:
+// res.send({ duration, query: req.params/query/body, rows, rowsAffected });
+async function runQuery(query) {
   try {
     const start = Date.now();
-    await pool.connect();
-    const { recordset: rows, rowsAffected } = await pool.query(sql);
+    await sql.connect(sqlConfig);
+    const { recordset: rows, rowsAffected } = await sql.query(query);
     const duration = Date.now() - start;
-    return { duration: `${duration} ms`, rows, rowsAffected: rowsAffected[0] };
+    return { duration: `${duration} ms`, rows, rowsAffected };
   } catch (err) {
     console.log('Database error:', err.message);
   }
 }
 
-module.exports = { sqlsrvConnect, query };
+module.exports = { sqlsrvConnect, runQuery };
