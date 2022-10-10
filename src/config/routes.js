@@ -19,7 +19,6 @@ const estado = require('../routes/utils/estado');
 const email = require('../routes/utils/email');
 const check = require('../routes/utils/check');
 const debug = require('../routes/utils/debug');
-const query = require('../routes/utils/query');
 // Inventario
 // const productos = require('../routes/inventario/productos');
 // const tipos = require('../routes/inventario/tipos');
@@ -56,7 +55,6 @@ module.exports = (app) => {
   app.use('/v1/utils/email', email);
   app.use('/v1/utils/check', check);
   app.use('/v1/utils/debug', debug);
-  app.use('/v1/utils/query', query);
   // Inventario
   // app.use('/v1/inventario/productos', productos);
   // app.use('/v1/inventario/tipos', tipos);
