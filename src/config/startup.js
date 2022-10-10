@@ -4,7 +4,7 @@ module.exports = () => {
     process.exit(1);
   }
   if (!process.env.ORIGIN) {
-    console.error('ERROR TERMINAL: JWT_SIGNATURE no está definida.');
+    console.error('ERROR TERMINAL: ORIGIN no está definida.');
     process.exit(1);
   }
   if (!process.env.ACCESTOKEN_MAX_AGE) {

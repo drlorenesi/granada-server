@@ -1,11 +1,14 @@
-require('dotenv').config();
 const express = require('express');
-const app = express();
 const Sentry = require('@sentry/node');
 const Tracing = require('@sentry/tracing');
+require('dotenv').config();
+require('express-async-errors');
+
+const app = express();
 
 // Startup Checks
 require('./config/startup')();
+
 // Prod Logger
 if (process.env.ENTORNO === 'produccion') {
   Sentry.init({
@@ -16,7 +19,6 @@ if (process.env.ENTORNO === 'produccion') {
       // enable Express.js middleware tracing
       new Tracing.Integrations.Express({ app }),
     ],
-
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
@@ -28,20 +30,21 @@ if (process.env.ENTORNO === 'produccion') {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 }
-// Dev Logger
-if (process.env.ENTORNO === 'desarrollo') {
-  require('./config/logger');
-}
+
 // Middleware
 require('./config/middleware')(app);
+
 // Routes
 require('./config/routes')(app);
+
 // Prod Error Handler
 // The error handler must be before any other error middleware and after all controllers
 if (process.env.ENTORNO === 'produccion') {
   app.use(Sentry.Handlers.errorHandler());
-  require('./middleware/prodError')(app);
+  // Optional fallthrough error handler
+  app.use(require('./middleware/prodError'));
 }
+
 // Dev Error Handler
 if (process.env.ENTORNO === 'desarrollo') {
   app.use(require('./middleware/devError'));

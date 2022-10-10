@@ -30,9 +30,9 @@ describe('Verificar variables de entorno en archivo ".env"', () => {
   });
   // ACCESTOKEN_MAX_AGE
   // ------------------
-  it('- debería desplegar "ERROR TERMINAL: ACCESTOKEN_MAX_AGE no está definida." en la consola', () => {
+  it('- debería desplegar "ERROR TERMINAL: ACCESTOKEN_MAX_AGE no está definido." en la consola', () => {
     expect(console.error).toHaveBeenCalledWith(
-      'ERROR TERMINAL: ACCESTOKEN_MAX_AGE no está definida.'
+      'ERROR TERMINAL: ACCESTOKEN_MAX_AGE no está definido.'
     );
   });
   it('- debería terminar el proceso con código de salida 1 si no se encuentra "ACCESTOKEN_MAX_AGE"', () => {
@@ -40,9 +40,9 @@ describe('Verificar variables de entorno en archivo ".env"', () => {
   });
   // REFRESHTOKEN_MAX_AGE
   // --------------------
-  it('- debería desplegar "ERROR TERMINAL: REFRESHTOKEN_MAX_AGE no está definida." en la consola', () => {
+  it('- debería desplegar "ERROR TERMINAL: REFRESHTOKEN_MAX_AGE no está definido." en la consola', () => {
     expect(console.error).toHaveBeenCalledWith(
-      'ERROR TERMINAL: REFRESHTOKEN_MAX_AGE no está definida.'
+      'ERROR TERMINAL: REFRESHTOKEN_MAX_AGE no está definido.'
     );
   });
   it('- debería terminar el proceso con código de salida 1 si no se encuentra "REFRESHTOKEN_MAX_AGE"', () => {

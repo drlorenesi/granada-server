@@ -8,7 +8,7 @@ const compression = require('compression');
 let origin = new RegExp(`${process.env.ORIGIN}`);
 
 const corsOptions = {
-  origin: [origin],
+  origin: [origin, 'http://localhost:3000'],
   credentials: true,
 };
 
@@ -20,6 +20,7 @@ module.exports = (app) => {
     app.use(morgan('dev'));
   }
   if (process.env.ENTORNO === 'produccion') {
+    console.log('production time!');
     app.use(helmet());
     app.use(compression());
   }

@@ -1,4 +1,3 @@
-require('express-async-errors');
 const { createLogger, format, transports } = require('winston');
 
 const logger = createLogger({

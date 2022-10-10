@@ -5,7 +5,6 @@ const { genSalt, hash } = require('bcryptjs');
 const { validateBody } = require('../middleware/validar');
 const emailVerificar = require('../utils/emailVerificar');
 const Usuario = require('../models/usuario');
-const { Role } = require('../models/role');
 
 const router = express.Router();
 

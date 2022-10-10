@@ -10,21 +10,20 @@ const rolesAutorizados = [1, 2];
 
 const query = (data) => {
   const schema = Joi.object({
-    stock: Joi.number().min(0).max(1).required(),
-    produccion: Joi.number().min(0).max(1).required(),
+    entrega: Joi.number().min(0).max(4).required(),
+    stock: Joi.number().min(0).max(4).required(),
   });
   return schema.validate(data);
 };
 
-// http://localhost:9000/v1/reportes/produccion/sugerido?stock=2&produccion=1
+// http://localhost:9000/v1/reportes/produccion/sugerido-mp?entrega=1&stock=2
 router.get(
   '/',
   [auth(rolesAutorizados), validateQuery(query)],
-  [validateQuery(query)],
   async (req, res) => {
-    const { stock, produccion } = req.query;
+    const { entrega, stock } = req.query;
     const { duration, rows, rowsAffected } = await runQuery(
-      `SELECT ${stock} AS stock, ${produccion} AS produccion`
+      `SELECT ${entrega} AS entrega, ${stock} AS stock`
     );
     res.send({ duration, query: req.query, rows, rowsAffected });
   }

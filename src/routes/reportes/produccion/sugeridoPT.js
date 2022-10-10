@@ -16,11 +16,10 @@ const query = (data) => {
   return schema.validate(data);
 };
 
-// http://localhost:9000/v1/reportes/produccion/sugerido?produccion=0.25&stock=0.50
+// http://localhost:9000/v1/reportes/produccion/sugerido-pt?produccion=0.25&stock=0.50
 router.get(
   '/',
   [auth(rolesAutorizados), validateQuery(query)],
-  [validateQuery(query)],
   async (req, res) => {
     const { produccion, stock } = req.query;
     const { duration, rows, rowsAffected } = await runQuery(
