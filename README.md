@@ -1,6 +1,6 @@
 # Granada Server
 
-Back End para para autenticar y crear sesiones de usuarios que utiliza [Express](https://expressjs.com/) y [MongoDB](https://www.mongodb.com/). Una vez autenticados los usuarios, puede hacer consultas a los Endpoints disponibles y tendrán acceso según su role.
+Back End para para autenticar y crear sesiones de usuarios que utiliza [Express](https://expressjs.com/) y [MongoDB](https://www.mongodb.com/). Una vez autenticado el usuario, puede hacer consultas a los distintos "Endpoints" y tendrán acceso según su role.
 
 Este proyecto hace uso de [HttpOnly Cookies](https://www.cookiepro.com/knowledge/httponly-cookie/) para autenticar a los usuarios. Por esta razón, es necesario correr el proceso en [HTTPS](https://www.cloudflare.com/learning/ssl/what-is-https/).
 
@@ -58,7 +58,7 @@ En caso se agreguen pruebas, estas se pueden correr con:
 npm run test
 ```
 
-También es posible agregar `roles` estándar a la Base de Datos con:
+También es posible agregar `roles` "estándar" a la Base de Datos con:
 
 ```bash
 npm run seed

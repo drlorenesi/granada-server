@@ -8,7 +8,11 @@ const compression = require('compression');
 let origin = new RegExp(`${process.env.ORIGIN}`);
 
 const corsOptions = {
-  origin: [origin, 'http://localhost:3000'],
+  origin: [
+    origin,
+    'http://localhost:3000',
+    'https://granada-frontend.pages.dev/',
+  ],
   credentials: true,
 };
 

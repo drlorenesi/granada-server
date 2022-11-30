@@ -9,7 +9,7 @@ const rolesAutorizados = [1];
 
 // GET
 router.get('/', [auth(rolesAutorizados)], async (req, res) => {
-  const sessions = await Session.find();
+  const sessions = await Session.find().sort({ createdAt: 1 });
   res.send(sessions);
 });
 

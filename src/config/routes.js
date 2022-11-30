@@ -30,8 +30,7 @@ const producto = require('../routes/reportes/ventas/producto');
 const categoria = require('../routes/reportes/ventas/categoria');
 // B - Produccion
 const sugeridoPT = require('../routes/reportes/produccion/sugeridoPT');
-const sugeridoMP = require('../routes/reportes/produccion/sugeridoMP');
-const sugeridoME = require('../routes/reportes/produccion/sugeridoME');
+const sugeridoMA = require('../routes/reportes/produccion/sugeridoMA');
 
 module.exports = (app) => {
   // Generales
@@ -66,6 +65,5 @@ module.exports = (app) => {
   app.use('/v1/reportes/ventas/categoria', categoria);
   // B - Produccion
   app.use('/v1/reportes/produccion/sugerido-pt', sugeridoPT);
-  app.use('/v1/reportes/produccion/sugerido-mp', sugeridoMP);
-  app.use('/v1/reportes/produccion/sugerido-me', sugeridoME);
+  app.use('/v1/reportes/produccion/sugerido-ma', sugeridoMA);
 };

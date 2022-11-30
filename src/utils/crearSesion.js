@@ -11,7 +11,10 @@ module.exports = async function (usuarioId, req) {
     // Obtener información sobre la conexión
     const infoConexion = {
       // ip: req.ip,
-      ip: req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'],
+      ip:
+        req.headers['cf-connecting-ip'] ||
+        req.headers['x-forwarded-for'] ||
+        req.headers['host'],
       userAgent: req.headers['user-agent'],
     };
     // Crear nueva sesión y guardar en DB

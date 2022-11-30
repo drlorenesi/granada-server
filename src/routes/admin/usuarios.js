@@ -25,7 +25,7 @@ const rolesAutorizados = [1];
 
 // GET
 router.get('/', [auth(rolesAutorizados)], async (req, res) => {
-  const usuarios = await Usuario.find();
+  const usuarios = await Usuario.find().sort({ ingresoActual: -1 });
   res.send(usuarios);
 });
 

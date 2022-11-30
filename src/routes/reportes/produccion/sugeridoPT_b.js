@@ -12,7 +12,7 @@ const query = (data) => {
   const schema = Joi.object({
     stock: Joi.number().min(0).max(1).required(),
     produccion: Joi.number().min(0).max(1).required(),
-    bodegas: Joi.string().empty('').default(null),
+    bodegas: Joi.string().allow(null, ''),
   });
   return schema.validate(data);
 };
@@ -23,7 +23,6 @@ router.get(
   [auth(rolesAutorizados), validateQuery(query)],
   async (req, res) => {
     const { produccion, stock, bodegas } = req.query;
-    console.log('bodegas:', bodegas);
     const { duration, rows, rowsAffected } = await runQuery(
       `DECLARE @f_hoy DATE = GETDATE (),
       @t_stock DECIMAL(4, 2) = ${stock},
@@ -109,9 +108,7 @@ router.get(
                 EXISTENCIA E
               WHERE
                 P.Codigo = E.Producto
-                AND E.Bodega IN (${
-                  bodegas === '' ? null : bodegas
-                }) -- Seleccionar Bodegas
+                AND E.Bodega IN (${bodegas}) -- Seleccionar Bodegas
             ) 'disponible',
             @t_stock 't_stock',
             @t_produccion 't_produccion'
