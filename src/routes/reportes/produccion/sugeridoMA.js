@@ -10,120 +10,134 @@ const rolesAutorizados = [1, 2];
 
 const query = (data) => {
   const schema = Joi.object({
+    tipo: Joi.number().min(1).max(4).required(),
     stock: Joi.number().min(0).max(1).required(),
     entrega: Joi.number().min(0).max(1).required(),
-    bodegas: Joi.string(),
+    bodegas: Joi.string().empty('').default(null),
   });
   return schema.validate(data);
 };
 
-router.get('/', [validateQuery(query)], async (req, res) => {
-  let { produccion, stock, bodegas } = req.query;
-  console.log({ bodegas });
-  res.send({ produccion, stock, bodegas });
-});
-
-// http://localhost:9000/v1/reportes/produccion/sugerido-pt?produccion=0.25&stock=0.50&bodegas=
-// router.get(
-//   '/',
-//   [auth(rolesAutorizados), validateQuery(query)],
-//   async (req, res) => {
-//     const { produccion, stock } = req.query;
-//     const { duration, rows, rowsAffected } = await runQuery(
-//       `DECLARE
-//       @fecha_hoy DATE = CAST(GETDATE () AS date),
-//       @intervalo1 int = 2,
-//       @intervalo2 int = 4,
-//       @t_produccion decimal (18,
-//         2) = ${produccion},
-//       @t_stock decimal (18,
-//         2) = ${stock}
-//     DECLARE
-//       @fecha_inicio1 date = CAST(DATEADD (m, - 1 * @intervalo1, @fecha_hoy) AS date),
-//       @fecha_inicio2 date = CAST(DATEADD (m, - 1 * @intervalo2, @fecha_hoy) AS date
-//     )
-//     SELECT
-//       T1.Codigo 'codigo',
-//       T1. [Codigo Alt] 'codigo_alt',
-//       T1.Descripcion 'descripcion',
-//       CAST(ISNULL(T3.Ventas2, 0) / @intervalo2 AS decimal (18, 2)) 'ventas_p4',
-//       CAST(ISNULL(T2.Ventas1, 0) / @intervalo1 AS decimal (18, 2)) 'ventas_p2',
-//       T5.Disponible 'disponible',
-//       @t_produccion 't_produccion',
-//       @t_stock 't_stock',
-//       CAST(ISNULL(T3.Ventas2, 0) / @intervalo2 AS decimal (18, 2)) * @t_produccion + CAST(ISNULL(T3.Ventas2, 0) / @intervalo2 AS decimal (18, 2)) * @t_stock - T5.Disponible 'sugerido_4',
-//       CAST(ISNULL(T2.Ventas1, 0) / @intervalo1 AS decimal (18, 2)) * @t_produccion + CAST(ISNULL(T2.Ventas1, 0) / @intervalo1 AS decimal (18, 2)) * @t_stock - T5.Disponible 'sugerido_2',
-//       CAST(((ISNULL(T3.Ventas2, 0) / @intervalo2 * @t_produccion + ISNULL(T3.Ventas2, 0) / @intervalo2 * @t_stock - T5.Disponible) + (ISNULL(T2.Ventas1, 0) / @intervalo1 * @t_produccion + ISNULL(T2.Ventas1, 0) / @intervalo1 * @t_stock - T5.Disponible)) / 2 AS decimal (18, 2)) 'promedio'
-//     FROM (
-//       SELECT
-//         P.Codigo,
-//         P. [Codigo Alt],
-//         P.Descripcion AS Descripcion
-//       FROM
-//         PRODUCTO AS P
-//       WHERE
-//         P. [Tipo Inventario] = 0
-//         AND P.Estatus = 'Activo'
-//       GROUP BY
-//         P.Codigo,
-//         P. [Codigo Alt],
-//         P.Descripcion) AS T1
-//       LEFT JOIN
-//       /*Ventas de Período 1*/
-//       (
-//         SELECT
-//           FD.Producto,
-//           SUM(FD.Cantidad) AS Ventas1
-//         FROM
-//           [FACTURA DETALLE] AS FD
-//           LEFT JOIN [FACTURA MAESTRO] AS FM ON FD.Serie = FM.Serie
-//             AND FD.Numero = FM.Numero
-//             AND FD.Empresa = FM.Empresa
-//             AND FD.Tipo = FM.Tipo
-//         WHERE
-//           FM.Empresa = 1
-//           AND FM.Estatus = 'G'
-//           AND FM.Fecha <= @fecha_hoy
-//           AND FM.Fecha >= @fecha_inicio1
-//         GROUP BY
-//           FD.Producto) AS T2 ON T1.Codigo = T2.Producto
-//       LEFT JOIN
-//       /*Ventas de Período 2*/
-//       (
-//         SELECT
-//           FD.Producto,
-//           SUM(FD.Cantidad) AS Ventas2
-//         FROM
-//           [FACTURA DETALLE] AS FD
-//           LEFT JOIN [FACTURA MAESTRO] AS FM ON FD.Serie = FM.Serie
-//             AND FD.Numero = FM.Numero
-//             AND FD.Empresa = FM.Empresa
-//             AND FD.Tipo = FM.Tipo
-//         WHERE
-//           FM.Empresa = 1
-//           AND FM.Estatus = 'G'
-//           AND FM.Fecha <= @fecha_hoy
-//           AND FM.Fecha >= @fecha_inicio2
-//         GROUP BY
-//           FD.Producto) AS T3 ON T1.Codigo = T3.Producto
-//       LEFT JOIN
-//       /*Existencias*/
-//       (
-//         SELECT
-//           Producto,
-//           CAST(SUM(Disponible) AS decimal (18, 2)) AS Disponible
-//         FROM
-//           EXISTENCIA
-//         WHERE
-//           Bodega IN(5, 11, 14, 27)
-//           AND Empresa = 1
-//         GROUP BY
-//           Producto) AS T5 ON T1.Codigo = T5.Producto
-//     ORDER BY
-//       T1. [Codigo Alt]`
-//     );
-//     res.send({ duration, query: req.query, rows, rowsAffected });
-//   }
-// );
+// http://localhost:9000/v1/reportes/produccion/sugerido-ma?tipo=1&stock=2.00&entrega=1.00&bodegas=
+router.get(
+  '/',
+  [auth(rolesAutorizados), validateQuery(query)],
+  async (req, res) => {
+    const { tipo, stock, entrega, bodegas } = req.query;
+    const { duration, rows, rowsAffected } = await runQuery(
+      `
+      DECLARE @f_hoy DATE = GETDATE (),
+      @t_stock DECIMAL (4, 2) = ${stock},
+      @t_entrega DECIMAL (4, 2) = ${entrega},
+      @int2 INT = 2,
+      @int4 INT = 4,
+      @f_ini2 DATE,
+      @f_ini4 DATE
+      SET
+        @f_ini2 = DATEADD (MM, - @int2, @f_hoy)
+      SET
+        @f_ini4 = DATEADD (MM, - @int4, @f_hoy)
+      SELECT
+      codigo,
+      codigo_alt,
+      descripcion,
+      unidad,
+      ISNULL(costo_pp, 0) 'costo_pp',
+      ISNULL(salidas_p4, 0) 'salidas_p4',
+      ISNULL(salidas_p4, 0) 'salidas_p2',
+      disponible,
+      @t_stock 't_stock',
+      @t_entrega 't_entrega',
+      ISNULL((salidas_p4*@t_entrega + salidas_p4*@t_stock - disponible), 0) 'sugerido_4',
+      ISNULL((salidas_p2*@t_entrega + salidas_p2*@t_stock - disponible), 0) 'sugerido_2',
+      ISNULL(((salidas_p4*@t_entrega + salidas_p4*@t_stock - disponible) +
+      (salidas_p2*@t_entrega + salidas_p2*@t_stock - disponible))/2, 0) 'orden'
+      FROM
+        (
+          SELECT
+            P.Codigo 'codigo',
+            P.[Codigo Alt] 'codigo_alt',
+            P.Descripcion 'descripcion',
+            -- Unidad de Medida
+            (
+              SELECT
+                PU.Descripcion
+              FROM
+                [PRODUCTO UNIDAD] PU
+              WHERE
+                P.Codigo = PU.Producto
+                AND PU.Estandar = 1
+            ) 'unidad',
+            --  Seleccionar Bodegas
+            (
+              SELECT
+                CAST(ISNULL(SUM(E.Disponible), 0) AS DECIMAL (10, 2))
+              FROM
+                EXISTENCIA E
+              WHERE
+                P.Codigo = E.Producto
+                AND E.Bodega IN(${bodegas === '' ? null : bodegas})
+            ) 'disponible',
+            -- Costo PP
+            (
+              SELECT
+                MAX(E.[Costo Promedio])
+              FROM
+                EXISTENCIA E
+              WHERE
+                P.Codigo = E.Producto
+              GROUP BY
+                E.Producto
+            ) 'costo_pp'
+          FROM
+            PRODUCTO AS P
+          WHERE
+            -- Seleccionar Tipo de Inventario
+            P.[Tipo Inventario] IN(${tipo === '' ? null : tipo})
+            AND P.Estatus = 'Activo'
+        ) AS T1
+        LEFT JOIN (
+          -- Salidas 4
+          SELECT
+            MD.Producto,
+            SUM(MD.Cantidad)/@int4 'salidas_p4'
+          FROM
+            [MOVIMIENTO MAESTRO] MM
+            INNER JOIN [MOVIMIENTO DETALLE] MD ON MM.Numero = MD.Numero
+            AND MM.Serie = MD.Serie
+            AND MM.Tipo = MD.Tipo
+          WHERE
+            MM.Tipo = 5
+            AND MM.Estatus = 'G'
+            AND MM.Fecha BETWEEN @f_ini4
+            AND @f_hoy
+          GROUP BY
+            MD.Producto
+        ) AS T2 ON T1.Codigo = T2.Producto
+        LEFT JOIN (
+          -- Salidas 2
+          SELECT
+            MD.Producto,
+            SUM(MD.Cantidad)/@int2 'salidas_p2'
+          FROM
+            [MOVIMIENTO MAESTRO] MM
+            INNER JOIN [MOVIMIENTO DETALLE] MD ON MM.Numero = MD.Numero
+            AND MM.Serie = MD.Serie
+            AND MM.Tipo = MD.Tipo
+          WHERE
+            MM.Tipo = 5
+            AND MM.Estatus = 'G'
+            AND MM.Fecha BETWEEN @f_ini2
+            AND @f_hoy
+          GROUP BY
+            MD.Producto
+        ) AS T3 ON T1.Codigo = T3.Producto
+      ORDER BY
+        codigo
+      `
+    );
+    res.send({ duration, query: req.query, rows, rowsAffected });
+  }
+);
 
 module.exports = router;

@@ -22,8 +22,7 @@ router.get(
   '/',
   [auth(rolesAutorizados), validateQuery(query)],
   async (req, res) => {
-    const { produccion, stock, bodegas } = req.query;
-    console.log('bodegas:', bodegas);
+    const { stock, produccion, bodegas } = req.query;
     const { duration, rows, rowsAffected } = await runQuery(
       `DECLARE @f_hoy DATE = GETDATE (),
       @t_stock DECIMAL(4, 2) = ${stock},
