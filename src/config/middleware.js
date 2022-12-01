@@ -11,7 +11,7 @@ const corsOptions = {
   origin: [
     origin,
     'http://localhost:3000',
-    'https://granada-frontend.pages.dev/',
+    'https://granada-frontend.pages.dev',
   ],
   credentials: true,
 };
