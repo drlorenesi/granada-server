@@ -24,6 +24,18 @@ router.get(
   [auth(rolesAutorizados), validateQuery(query)],
   async (req, res) => {
     const { tipo, stock, entrega, bodegas } = req.query;
+
+    let seleccion;
+    if (tipo === '4') {
+      seleccion = `AND P.[Tipo Inventario] IN(1) AND P.Intermedio = 1`;
+      console.log(seleccion);
+    } else {
+      seleccion = `AND P.[Tipo Inventario] IN(${
+        tipo === '' ? null : tipo
+      }) AND P.Intermedio = 0`;
+      console.log(seleccion);
+    }
+
     const { duration, rows, rowsAffected } = await runQuery(
       `
       DECLARE @f_hoy DATE = GETDATE (),
@@ -93,8 +105,8 @@ router.get(
             PRODUCTO AS P
           WHERE
             -- Seleccionar Tipo de Inventario
-            P.[Tipo Inventario] IN(${tipo === '' ? null : tipo})
-            AND P.Estatus = 'Activo'
+            P.Estatus = 'Activo'
+            ${seleccion}
         ) AS T1
         LEFT JOIN (
           -- Salidas 4
