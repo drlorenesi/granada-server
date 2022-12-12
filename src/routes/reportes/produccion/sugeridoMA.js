@@ -28,12 +28,10 @@ router.get(
     let seleccion;
     if (tipo === '4') {
       seleccion = `AND P.[Tipo Inventario] IN(1) AND P.Intermedio = 1`;
-      console.log(seleccion);
     } else {
       seleccion = `AND P.[Tipo Inventario] IN(${
         tipo === '' ? null : tipo
       }) AND P.Intermedio = 0`;
-      console.log(seleccion);
     }
 
     const { duration, rows, rowsAffected } = await runQuery(

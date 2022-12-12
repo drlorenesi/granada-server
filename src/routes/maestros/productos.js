@@ -11,7 +11,7 @@ const rolesAutorizados = [1];
 const validateProducto = (data) => {
   const schema = Joi.object({
     tipo: Joi.number().integer().min(0).max(10).required(),
-    estatus: Joi.string().valid('activo', 'inactivo').required(),
+    estatus: Joi.string().empty('').default(null),
   });
   return schema.validate(data);
 };
@@ -23,36 +23,47 @@ const validateCodigo = (data) => {
   return schema.validate(data);
 };
 
-// http://localhost:9000/v1/inventario/productos?tipo=0&estatus=activo
+// http://localhost:9000/v1/maestros/productos?tipo=0&estatus=
 router.get(
   '/',
   [auth(rolesAutorizados), validateQuery(validateProducto)],
   async (req, res) => {
     const { tipo, estatus } = req.query;
-    console.log(tipo, estatus);
+
+    let seleccion1;
+    if (tipo === '4') {
+      seleccion1 = `P.[Tipo Inventario] IN(1) AND P.Intermedio = 1`;
+    } else {
+      seleccion1 = `P.[Tipo Inventario] IN(${
+        tipo === '' ? null : tipo
+      }) AND P.Intermedio = 0`;
+    }
+
+    let seleccion2;
+    if (estatus === '1') {
+      seleccion2 = `AND P.Estatus = 'Activo'`;
+      console.log('estatus 1');
+    } else if (estatus === '0') {
+      seleccion2 = `AND P.Estatus = 'Inactivo'`;
+    } else {
+      seleccion2 = '';
+    }
+
     const { duration, rows } = await runQuery(`
-  DECLARE
-    @Tipo INT = '${tipo}',
-    @Estatus VARCHAR(30) = '${estatus}'
+    DECLARE
+    @tipo INT = '${tipo}',
+    @estatus VARCHAR(30) = '${estatus}'
     SELECT
       P.Codigo 'codigo',
-      P. [Tipo Inventario] 'tipo_inventario',
-      P.Intermedio 'intermedio',
-      P.Division 'division',
       P. [Codigo Alt] 'codigo_alt',
       P.Descripcion 'descripcion',
-      P.Minimo 'minimo',
-      P.Maximo 'maximo', 
-      P. [Precio Sugerido] 'precio_sugerido',
-      P.Costo 'costo',
-      P.Peso 'peso',
-      P.[Re Orden] 're_orden',
-      P.[Unidad Minima] 'unidad_minima'
+      P.Estatus 'estatus'
     FROM
       PRODUCTO AS P
     WHERE
-      P. [TIPO INVENTARIO] = @Tipo
-      AND P.Estatus = @Estatus
+      -- Seleccionar Tipo de Inventario
+      ${seleccion1}
+      ${seleccion2}
   `);
     res.send({ duration, rows });
   }

@@ -19,9 +19,9 @@ const estado = require('../routes/utils/estado');
 const email = require('../routes/utils/email');
 const check = require('../routes/utils/check');
 const debug = require('../routes/utils/debug');
-// Inventario
-// const productos = require('../routes/inventario/productos');
-// const tipos = require('../routes/inventario/tipos');
+const query = require('../routes/utils/query');
+// Maestros
+const productos = require('../routes/maestros/productos');
 // Reportes
 // --------
 // A - Ventas
@@ -54,9 +54,9 @@ module.exports = (app) => {
   app.use('/v1/utils/email', email);
   app.use('/v1/utils/check', check);
   app.use('/v1/utils/debug', debug);
-  // Inventario
-  // app.use('/v1/inventario/productos', productos);
-  // app.use('/v1/inventario/tipos', tipos);
+  app.use('/v1/utils/query', query);
+  // Maestros
+  app.use('/v1/maestros/productos', productos);
   // Reportes
   // --------
   // A - Ventas
