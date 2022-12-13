@@ -49,42 +49,44 @@ router.get(
       seleccion2 = '';
     }
 
-    const { duration, rows } = await runQuery(`
-    DECLARE
-    @tipo INT = '${tipo}',
-    @estatus VARCHAR(30) = '${estatus}'
-    SELECT
+    const { duration, rows, rowsAffected } = await runQuery(
+      `DECLARE
+      @tipo INT = '${tipo}',
+      @estatus VARCHAR(30) = '${estatus}'
+      SELECT
+        P.Codigo 'codigo',
+        P. [Codigo Alt] 'codigo_alt',
+        P.Descripcion 'descripcion',
+        P.Estatus 'estatus'
+      FROM
+        PRODUCTO AS P
+      WHERE
+        -- Seleccionar Tipo de Inventario
+        ${seleccion1}
+        ${seleccion2}`
+    );
+    res.send({ duration, query: req.query, rows, rowsAffected });
+  }
+);
+
+// http://localhost:9000/v1/inventario/productos/000101
+router.get(
+  '/:id',
+  [auth(rolesAutorizados), validateParams(validateCodigo)],
+  async (req, res) => {
+    const { duration, rows, rowsAffected } = await runQuery(
+      `SELECT
       P.Codigo 'codigo',
-      P. [Codigo Alt] 'codigo_alt',
+      P.[Codigo Alt] 'codigo_alt',
       P.Descripcion 'descripcion',
       P.Estatus 'estatus'
     FROM
       PRODUCTO AS P
     WHERE
-      -- Seleccionar Tipo de Inventario
-      ${seleccion1}
-      ${seleccion2}
-  `);
-    res.send({ duration, rows });
+      P.Codigo = '${req.params.id}'`
+    );
+    res.send({ duration, query: req.query, rows, rowsAffected });
   }
 );
-
-// http://localhost:9000/v1/inventario/productos/000101
-router.get('/:id', [validateParams(validateCodigo)], async (req, res) => {
-  const { duration, rows } = await query(`
-    SELECT
-      P.[Tipo Inventario] 'tipo_inventario',
-      P.Division 'division',
-      P.[Codigo Alt] 'codigo_alt',
-      P.Descripcion 'descripcion',
-      P.[Precio Sugerido] 'precio_sugerido',
-      P.Costo 'costo'
-    FROM
-      PRODUCTO AS P
-    WHERE
-      P.Codigo = '${req.params.id}'
-  `);
-  res.send({ duration, rows });
-});
 
 module.exports = router;

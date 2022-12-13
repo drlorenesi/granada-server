@@ -35,8 +35,7 @@ router.get(
     }
 
     const { duration, rows, rowsAffected } = await runQuery(
-      `
-      DECLARE @f_hoy DATE = GETDATE (),
+      `DECLARE @f_hoy DATE = GETDATE (),
       @t_stock DECIMAL (4, 2) = ${stock},
       @t_entrega DECIMAL (4, 2) = ${entrega},
       @int2 INT = 2,
@@ -143,8 +142,7 @@ router.get(
             MD.Producto
         ) AS T3 ON T1.Codigo = T3.Producto
       ORDER BY
-        codigo
-      `
+        codigo`
     );
     res.send({ duration, query: req.query, rows, rowsAffected });
   }
