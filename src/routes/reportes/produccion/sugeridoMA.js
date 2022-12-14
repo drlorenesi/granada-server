@@ -53,7 +53,7 @@ router.get(
       unidad,
       ISNULL(costo_pp, 0) 'costo_pp',
       ISNULL(salidas_p4, 0) 'salidas_p4',
-      ISNULL(salidas_p4, 0) 'salidas_p2',
+      ISNULL(salidas_p2, 0) 'salidas_p2',
       disponible,
       @t_stock 't_stock',
       @t_entrega 't_entrega',
