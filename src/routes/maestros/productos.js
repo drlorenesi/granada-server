@@ -85,8 +85,17 @@ router.get(
     WHERE
       P.Codigo = '${req.params.id}'`
     );
+    if (rows.length === 0)
+      return res
+        .status(404)
+        .send({ mensaje: 'El producto solicitado no existe.' });
     res.send({ duration, query: req.query, rows, rowsAffected });
   }
 );
+
+router.put('/:id', async (req, res) => {
+  console.log(req.params.id, req.body);
+  res.send('Here');
+});
 
 module.exports = router;
