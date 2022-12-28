@@ -16,7 +16,7 @@ const validateDates = (data) => {
   return schema.validate(data);
 };
 
-// http://localhost:9000/v1/reportes/ventas/unidades-mensuales?fechaIni=2022-01-01&fechaFin=2022-01-06
+// http://localhost:9000/v1/reportes/produccion/unidades-mensuales?fechaIni=2022-01-01&fechaFin=2022-01-06
 router.get(
   '/',
   [auth(rolesAutorizados), validateQuery(validateDates)],
@@ -26,9 +26,9 @@ router.get(
     DECLARE
       @fechaIni DATE = '${fechaIni}',
       @fechaFin DATE = '${fechaFin}'
-    SET
+      SET
       LANGUAGE Spanish
-    SELECT
+    SELECT 
       *
     FROM
       (
@@ -36,31 +36,32 @@ router.get(
           P.Codigo 'codigo',
           P.[Codigo Alt] 'codigo_alt',
           P.Descripcion 'descripcion',
-          DATENAME(MONTH, FM.Fecha) 'mes',
-          SUM(FD.Cantidad) 'cantidad'
+          P.Peso 'peso',
+          DATENAME(MONTH, MM.Fecha) 'mes',
+          SUM(MD.Cantidad) 'cantidad'
         FROM
           PRODUCTO P
-          LEFT JOIN [FACTURA DETALLE] FD ON P.Codigo = FD.Producto
-          LEFT JOIN [FACTURA MAESTRO] FM ON FD.Numero = FM.Numero
-          AND FD.Serie = FM.Serie
-          AND FD.Tipo = FM.Tipo
-          AND FD.Empresa = FM.Empresa
-          LEFT JOIN CLIENTE C ON FM.Cliente = C.Codigo
+          LEFT JOIN [MOVIMIENTO DETALLE] MD ON P.Codigo = MD.Producto
+          LEFT JOIN [MOVIMIENTO MAESTRO] MM ON MD.Numero = MM.Numero
+          AND MD.Serie = MM.Serie
+          AND MD.Tipo = MM.Tipo
+          AND MD.Empresa = MM.Empresa
         WHERE
-          FM.Estatus = 'G'
-          AND FM.Fecha BETWEEN @fechaIni
+          MM.Estatus = 'G'
+          AND MM.Bodega IN(5, 11)
+          AND MM.Fecha BETWEEN @fechaIni
           AND @fechaFin
-          AND FM.Tipo = 4
+          AND MM.Tipo = 15
           AND P.[Tipo Inventario] IN(0)
-          AND C.[E-mail] NOT LIKE '%AUTOC%'
           AND P.Estatus = 'Activo'
         GROUP BY
           P.Codigo,
           P.[Codigo Alt],
           P.Descripcion,
-          DATENAME(MONTH, FM.Fecha)
+          P.Peso,
+          DATENAME(MONTH, MM.Fecha)
       ) T1 PIVOT (
-        SUM(Cantidad) FOR Mes IN (
+        SUM(cantidad) FOR mes IN (
           [Enero],
           [Febrero],
           [Marzo],

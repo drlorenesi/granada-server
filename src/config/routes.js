@@ -28,10 +28,11 @@ const productos = require('../routes/maestros/productos');
 const canal = require('../routes/reportes/ventas/canal');
 const producto = require('../routes/reportes/ventas/producto');
 const categoria = require('../routes/reportes/ventas/categoria');
-const unidadesMensuales = require('../routes/reportes/ventas/unidadesMensuales');
+const unidadesMensualesV = require('../routes/reportes/ventas/unidadesMensuales');
 // B - Produccion
 const sugeridoPT = require('../routes/reportes/produccion/sugeridoPT');
 const sugeridoMA = require('../routes/reportes/produccion/sugeridoMA');
+const unidadesMensualesP = require('../routes/reportes/produccion/unidadesMensuales');
 
 module.exports = (app) => {
   // Generales
@@ -64,8 +65,9 @@ module.exports = (app) => {
   app.use('/v1/reportes/ventas/canal', canal);
   app.use('/v1/reportes/ventas/producto', producto);
   app.use('/v1/reportes/ventas/categoria', categoria);
-  app.use('/v1/reportes/ventas/unidades-mensuales', unidadesMensuales);
+  app.use('/v1/reportes/ventas/unidades-mensuales', unidadesMensualesV);
   // B - Produccion
   app.use('/v1/reportes/produccion/sugerido-pt', sugeridoPT);
   app.use('/v1/reportes/produccion/sugerido-ma', sugeridoMA);
+  app.use('/v1/reportes/produccion/unidades-mensuales', unidadesMensualesP);
 };
