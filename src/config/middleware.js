@@ -25,7 +25,6 @@ module.exports = (app) => {
     app.use(morgan('dev'));
   }
   if (process.env.ENTORNO === 'produccion') {
-    console.log('production time!');
     app.use(helmet());
     app.use(compression());
   }
