@@ -1,7 +1,7 @@
 // https://www.npmjs.com/package/mssql
-const sql = require('mssql');
+const { ConnectionPool } = require('mssql');
 
-const sqlConfig = {
+const pool = new ConnectionPool({
   user: process.env.SQLSRV_USER,
   password: process.env.SQLSRV_PASSWORD,
   database: process.env.SQLSRV_DATABASE,
@@ -12,39 +12,33 @@ const sqlConfig = {
     idleTimeoutMillis: 30000,
   },
   options: {
-    encrypt: false, // for azure
-    trustServerCertificate: true, // change to true for local dev / self-signed certs
+    encrypt: false,
+    enableArithAbort: true,
   },
-};
+});
 
 // Test connection during App startup
 async function sqlsrvConnect() {
   try {
-    const db = await sql.connect(sqlConfig);
-    console.log(`- Conectado a ${db.config.database} en ${db.config.server}`);
+    const db = await pool.connect();
+    console.log(`- Connected to ${db.config.database} on ${db.config.server}`);
   } catch (err) {
-    console.error(
-      '- No fue posible conectarse a la Base de Datos:',
-      err.message
-    );
-    return err;
+    console.error('Database connection error:', err.message);
   }
 }
 
 // Write async queries as:
-// const { duration, rows, rowsAffected } = await runQuery(`SELECT GETDATE() AS Time`);
-// Return result as:
-// res.send({ duration, query: req.params/query/body, rows, rowsAffected });
-async function runQuery(query) {
+// const { duration, rows, rowsAffected } = await query(`SELECT NOW()`);
+async function query(sql) {
   try {
     const start = Date.now();
-    await sql.connect(sqlConfig);
-    const { recordset: rows, rowsAffected } = await sql.query(query);
+    await pool.connect();
+    const { recordset: rows, rowsAffected } = await pool.query(sql);
     const duration = Date.now() - start;
-    return { duration: `${duration} ms`, rows, rowsAffected };
+    return { duration: `${duration} ms`, rows, rowsAffected: rowsAffected[0] };
   } catch (err) {
     console.log('Database error:', err.message);
   }
 }
 
-module.exports = { sqlsrvConnect, runQuery };
+module.exports = { sqlsrvConnect, query };

@@ -6,7 +6,7 @@ const { runQuery } = require('../../config/db/sqlsrv');
 
 const router = express.Router();
 
-const rolesAutorizados = [1];
+const rolesAutorizados = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const validateProducto = (data) => {
   const schema = Joi.object({
