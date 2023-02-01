@@ -30,14 +30,14 @@ async function sqlsrvConnect() {
 // Write async queries as:
 // const { duration, rows, rowsAffected } = await query(`SELECT NOW()`);
 async function query(sql) {
+  const start = Date.now();
   try {
-    const start = Date.now();
     await pool.connect();
     const { recordset: rows, rowsAffected } = await pool.query(sql);
     const duration = Date.now() - start;
     return { duration: `${duration} ms`, rows, rowsAffected: rowsAffected[0] };
   } catch (err) {
-    console.log('Database error:', err.message);
+    throw new Error(err);
   }
 }
 

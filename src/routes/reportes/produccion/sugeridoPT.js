@@ -2,13 +2,13 @@ const express = require('express');
 const Joi = require('joi');
 const auth = require('../../../middleware/auth');
 const { validateQuery } = require('../../../middleware/validar');
-const { runQuery } = require('../../../config/db/sqlsrv');
+const { query } = require('../../../config/db/sqlsrv');
 
 const router = express.Router();
 
 const rolesAutorizados = [1, 2];
 
-const query = (data) => {
+const validate = (data) => {
   const schema = Joi.object({
     stock: Joi.number().min(0).max(1).required(),
     produccion: Joi.number().min(0).max(1).required(),
@@ -20,10 +20,10 @@ const query = (data) => {
 // http://localhost:9000/v1/reportes/produccion/sugerido-pt?produccion=0.25&stock=0.50&bodegas=
 router.get(
   '/',
-  [auth(rolesAutorizados), validateQuery(query)],
+  [auth(rolesAutorizados), validateQuery(validate)],
   async (req, res) => {
     const { stock, produccion, bodegas } = req.query;
-    const { duration, rows, rowsAffected } = await runQuery(
+    const { duration, rows, rowsAffected } = await query(
       `DECLARE @f_hoy DATE = GETDATE (),
       @t_stock DECIMAL(4, 2) = ${stock},
       @t_produccion DECIMAL(4, 2) = ${produccion},

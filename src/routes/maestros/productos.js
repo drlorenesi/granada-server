@@ -2,7 +2,7 @@ const express = require('express');
 const Joi = require('joi');
 const auth = require('../../middleware/auth');
 const { validateQuery, validateParams } = require('../../middleware/validar');
-const { runQuery } = require('../../config/db/sqlsrv');
+const { query } = require('../../config/db/sqlsrv');
 
 const router = express.Router();
 
@@ -56,7 +56,7 @@ router.get(
       seleccion2 = '';
     }
 
-    const { duration, rows, rowsAffected } = await runQuery(`
+    const { duration, rows, rowsAffected } = await query(`
     SELECT
       P.Codigo 'codigo',
       P.[Codigo Alt] 'codigo_alt',
@@ -113,7 +113,7 @@ router.get(
   '/:id',
   [auth(rolesAutorizados), validateParams(validateCodigo)],
   async (req, res) => {
-    const { duration, rows, rowsAffected } = await runQuery(`
+    const { duration, rows, rowsAffected } = await query(`
     SELECT
       P.Codigo 'codigo',
       P.[Codigo Alt] 'codigo_alt',
@@ -161,7 +161,7 @@ router.get(
 );
 
 router.put('/:id', [auth(rolesAutorizados)], async (req, res) => {
-  const { duration, rows, rowsAffected } = await runQuery(`
+  const { duration, rows, rowsAffected } = await query(`
   UPDATE
     PRODUCTO
   SET
