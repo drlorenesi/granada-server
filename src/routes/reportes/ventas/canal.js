@@ -31,15 +31,13 @@ router.get(
             ISNULL(T2. [Total Ventas sIVA], 0) AS 'total_ventas_siva',
             ISNULL(T3. [Total NC Devolución sIVA], 0) AS 'total_nc_devolucion_siva',
             ISNULL(T4. [Total NC Valor sIVA], 0) AS 'total_nc_valor_siva',
-            ISNULL(T2. [Total Ventas sIVA], 0) - ISNULL(T3. [Total NC Devolución sIVA], 0) - ISNULL(T4. [Total NC Valor sIVA], 0) AS 'total'
-            -- DIVISION CLIENTE
+            ISNULL(T2. [Total Ventas sIVA], 0) - ISNULL(T3. [Total NC Devolución sIVA], 0) - ISNULL(T4. [Total NC Valor sIVA], 0) AS 'total' -- DIVISION CLIENTE
         FROM (
             SELECT
                 DV. [Descripcion General],
                 DV.Orden
             FROM
-                [DIVISION CLIENTE] AS DV) AS T1
-        -- FACTURAS GRABADAS sIVA
+                [DIVISION CLIENTE] AS DV) AS T1 -- FACTURAS GRABADAS sIVA
         LEFT JOIN (
             SELECT
                 DV. [Descripcion General],
@@ -58,31 +56,29 @@ router.get(
                 AND @FechaFin
                 AND FM.Estatus = 'G'
             GROUP BY
-                DV. [Descripcion General]) AS T2 ON T1. [Descripcion General] = T2. [Descripcion General]
-        -- NOTAS DE CRÉDITO DEVOLUCION sIVA
+                DV. [Descripcion General]) AS T2 ON T1. [Descripcion General] = T2. [Descripcion General] -- NOTAS DE CRÉDITO DEVOLUCION sIVA
         LEFT JOIN (
             SELECT
                 DC. [Descripcion General],
                 ROUND(SUM(
-                        CASE WHEN CXC.Moneda = 1 THEN
-                            CXC.Total / 1.12
-                        WHEN CXC.Moneda != 1 THEN
-                            CXC.Total * CXC. [Tipo Cambio]
+                        CASE WHEN CM.Moneda = 1 THEN
+                            CM.Total / 1.12
+                        WHEN CM.Moneda != 1 THEN
+                            CM.Total * CM. [Tipo Cambio]
                         END), 2) AS 'Total NC Devolución sIVA'
             FROM
-                [CXC MAESTRO] AS CXC
-                LEFT JOIN CLIENTE AS C ON CXC.Cliente = C.Codigo
-                    AND CXC.Empresa = C.Empresa
+                [CREDITO MAESTRO] AS CM
+                LEFT JOIN CLIENTE AS C ON CM.Cliente = C.Codigo
+                    AND CM.Empresa = C.Empresa
             LEFT JOIN [DIVISION CLIENTE] AS DC ON C.Division = DC.Codigo
         WHERE
-            CXC.Empresa = 1
-            AND CXC.Tipo = 14
-            AND CAST(CXC.Fecha AS DATE) BETWEEN @FechaIni
+            CM.Empresa = 1
+            AND CM.Tipo IN (14, 17)
+            AND CAST(CM.Fecha AS DATE) BETWEEN @FechaIni
             AND @FechaFin
-            AND CXC.Estatus = 'G'
+            AND CM.Estatus = 'G'
         GROUP BY
-            DC. [Descripcion General]) AS T3 ON T1. [Descripcion General] = T3. [Descripcion General]
-        -- NOTAS DE CRÉDITO VALOR sIVA
+            DC. [Descripcion General]) AS T3 ON T1. [Descripcion General] = T3. [Descripcion General] -- NOTAS DE CRÉDITO VALOR sIVA
         LEFT JOIN (
             SELECT
                 DC. [Descripcion General],
