@@ -53,7 +53,6 @@ router.get(
           AND @fechaFin
           AND MM.Tipo = 15
           AND P.[Tipo Inventario] IN(0)
-          AND P.Estatus = 'Activo'
         GROUP BY
           P.Codigo,
           P.[Codigo Alt],
