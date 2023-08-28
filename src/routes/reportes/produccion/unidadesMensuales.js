@@ -48,7 +48,7 @@ router.get(
           AND MD.Empresa = MM.Empresa
         WHERE
           MM.Estatus = 'G'
-          AND MM.Bodega IN(5, 11)
+          AND MM.Bodega IN(5, 11, 213)
           AND MM.Fecha BETWEEN @fechaIni
           AND @fechaFin
           AND MM.Tipo = 15
