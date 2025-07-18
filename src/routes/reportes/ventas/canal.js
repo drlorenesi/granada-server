@@ -24,63 +24,119 @@ router.get(
     const { fechaIni, fechaFin } = req.query;
     const { duration, rows } = await query(`
     DECLARE @FechaIni DATE = '${fechaIni}',
-            @FechaFin DATE = '${fechaFin}'
+      @FechaFin DATE = '${fechaFin}'
       SELECT
-        DV.[Descripcion General] AS 'canal',
-        ISNULL(
-          (
-            SELECT
-              SUM(
-                ROUND(
-                  CASE
-                    WHEN FM.Moneda = 1 THEN FM.Total / 1.12
-                    WHEN FM.Moneda != 1 THEN FM.Total * FM.[Tipo Cambio]
-                  END,
-                  2
-                )
-              )
-            FROM
-              [FACTURA MAESTRO] AS FM
-              INNER JOIN CLIENTE AS C ON C.Empresa = FM.Empresa
-              AND FM.Cliente = C.Codigo
-            WHERE
-              FM.Empresa = 1
-              AND CONVERT(DATE, FM.Fecha) BETWEEN @FechaIni AND @FechaFin
-              AND FM.Estatus = 'G'
-              AND C.Division = DV.Codigo
-          ),
-          0
-        ) AS 'Total Ventas sIVA',
-        ISNULL(
-          (
-            SELECT
-              SUM(
-                ROUND(
-                  CASE
-                    WHEN CXC.Moneda = 1 THEN CXC.Total / 1.12
-                    WHEN CXC.Moneda != 1 THEN CXC.Total * CXC.[Tipo Cambio]
-                  END,
-                  2
-                )
-              )
-            FROM
-              [CXC MAESTRO] AS CXC
-              LEFT JOIN CLIENTE AS C ON CXC.Cliente = C.Codigo
-              AND CXC.Empresa = C.Empresa
-            WHERE
-              CXC.Empresa = 1
-              AND CXC.Tipo = 2
-              AND CONVERT(DATE, CXC.Fecha) BETWEEN @FechaIni AND @FechaFin
-              AND CXC.Estatus = 'G'
-              AND C.Division = DV.Codigo
-          ),
-          0
-        ) 'Total NC Valor sIVA'
+        T1.canal,
+        T1.ventas_siva,
+        T1.nc_descuento_siva,
+        T1.nc_devolucion_siva,
+        (ventas_siva - nc_descuento_siva - nc_devolucion_siva) AS 'total'
       FROM
-        [DIVISION CLIENTE] AS DV
-      ORDER BY
-        DV.Orden
-  `);
+        (
+          SELECT
+            DV.[Descripcion General] AS 'canal',
+            ISNULL(
+              (
+                SELECT
+                  SUM(
+                    ROUND(
+                      CASE
+                        WHEN FM.Moneda = 1 THEN FM.Total / 1.12
+                        WHEN FM.Moneda != 1 THEN FM.Total * FM.[Tipo Cambio]
+                      END,
+                      2
+                    )
+                  )
+                FROM
+                  [FACTURA MAESTRO] AS FM
+                  INNER JOIN CLIENTE AS C ON C.Empresa = FM.Empresa
+                  AND FM.Cliente = C.Codigo
+                WHERE
+                  FM.Empresa = 1
+                  AND CONVERT(DATE, FM.Fecha) BETWEEN @FechaIni AND @FechaFin
+                  AND FM.Estatus = 'G'
+                  AND C.Division = DV.Codigo
+              ),
+              0
+            ) AS 'ventas_siva',
+            ISNULL(
+              (
+                SELECT
+                  SUM(
+                    ROUND(
+                      CASE
+                        WHEN CXC.Moneda = 1 THEN CXC.Total / 1.12
+                        WHEN CXC.Moneda != 1 THEN CXC.Total * CXC.[Tipo Cambio]
+                      END,
+                      2
+                    )
+                  )
+                FROM
+                  [CXC MAESTRO] AS CXC
+                  LEFT JOIN CLIENTE AS C ON CXC.Cliente = C.Codigo
+                  AND CXC.Empresa = C.Empresa
+                WHERE
+                  CXC.Empresa = 1
+                  AND CXC.Tipo = 2
+                  AND CONVERT(DATE, CXC.Fecha) BETWEEN @FechaIni AND @FechaFin
+                  AND CXC.Estatus = 'G'
+                  AND C.Division = DV.Codigo
+                  AND NOT EXISTS (
+                    SELECT
+                      1
+                    FROM
+                      [CREDITO MAESTRO] AS CRE
+                    WHERE
+                      CRE.Empresa = CXC.Empresa
+                      AND CRE.Cliente = CXC.Cliente
+                      AND CRE.Total = CXC.Total
+                      AND YEAR(CRE.Fecha) = YEAR(CXC.Fecha)
+                      AND MONTH(CRE.Fecha) = MONTH(CXC.Fecha)
+                  )
+              ),
+              0
+            ) AS 'nc_descuento_siva',
+            ISNULL(
+              (
+                SELECT
+                  SUM(
+                    ROUND(
+                      CASE
+                        WHEN CXC.Moneda = 1 THEN CXC.Total / 1.12
+                        WHEN CXC.Moneda != 1 THEN CXC.Total * CXC.[Tipo Cambio]
+                      END,
+                      2
+                    )
+                  )
+                FROM
+                  [CXC MAESTRO] AS CXC
+                  LEFT JOIN CLIENTE AS C ON CXC.Cliente = C.Codigo
+                  AND CXC.Empresa = C.Empresa
+                WHERE
+                  CXC.Empresa = 1
+                  AND CXC.Tipo = 2
+                  AND CONVERT(DATE, CXC.Fecha) BETWEEN @FechaIni AND @FechaFin
+                  AND CXC.Estatus = 'G'
+                  AND C.Division = DV.Codigo
+                  AND EXISTS (
+                    SELECT
+                      1
+                    FROM
+                      [CREDITO MAESTRO] AS CRE
+                    WHERE
+                      CRE.Empresa = CXC.Empresa
+                      AND CRE.Cliente = CXC.Cliente
+                      AND CRE.Total = CXC.Total
+                      AND YEAR(CRE.Fecha) = YEAR(CXC.Fecha)
+                      AND MONTH(CRE.Fecha) = MONTH(CXC.Fecha)
+                  )
+              ),
+              0
+            ) AS 'nc_devolucion_siva'
+          FROM
+            [DIVISION CLIENTE] AS DV
+        ) AS T1
+    `);
     res.send({ duration, query: req.query, rows });
   }
 );
