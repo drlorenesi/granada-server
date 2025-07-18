@@ -136,6 +136,8 @@ router.get(
           FROM
             [DIVISION CLIENTE] AS DV
         ) AS T1
+        ORDER BY
+        canal
     `);
     res.send({ duration, query: req.query, rows });
   }
